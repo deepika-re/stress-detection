@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Stress Monitor{% endblock %}
+
+{% block head %}
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell"
+         data-user-name="{{ current_user.name }}"
+         data-face-interval="{{ config['FACE_INFERENCE_MIN_INTERVAL_SECONDS'] }}">
+    <div class="dashboard-heading">
+        <div>
+            <p class="eyebrow">Live physiology</p>
+            <h1>Stress command center</h1>
+        </div>
+        <div class="device-actions">
+            <button id="connectDevice" type="button">Connect Device</button>
+            <button id="disconnectDevice" type="button" class="secondary">Disconnect</button>
+        </div>
+    </div>
+
+    <section class="status-grid">
+        <article>
+            <span>Web Serial</span>
+            <strong id="serialSupport">Checking</strong>
+            <small id="serialFallback">Local Bridge fallback appears here if needed.</small>
+        </article>
+        <article>
+            <span>Device</span>
+            <strong id="deviceStatus">disconnected</strong>
+            <small id="streamId">No stream yet</small>
+        </article>
+        <article>
+            <span>Socket</span>
+            <strong id="socketStatus">connecting</strong>
+            <small id="ackStatus">No ACK yet</small>
+        </article>
+        <article>
+            <span>Dropped</span>
+            <strong id="droppedCount">0</strong>
+            <small id="bufferStatus">buffer empty</small>
+        </article>
+    </section>
+
+    <section id="stressBanner" class="stress-banner level-low">
+        <div class="stress-state">
+            <span>Current state</span>
+            <strong>LOW</strong>
+        </div>
+        <div class="stress-meter" role="meter" aria-label="Stress score" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <span id="stressMeterFill"></span>
+        </div>
+        <div class="stress-score-pill">
+            <span>Score</span>
+            <strong id="stressMeterValue">--</strong>
+        </div>
+        <small id="stressReasons">Waiting for readings</small>
+    </section>
+
+    <section class="metric-grid primary-metrics">
+        <article class="metric-card">
+            <span>Heart rate</span>
+            <strong id="heartRate">--</strong>
+            <small>bpm</small>
+        </article>
+        <article class="metric-card">
+            <span>GSR</span>
+            <strong id="gsr">--</strong>
+            <small>skin conductance</small>
+        </article>
+        <article class="metric-card">
+            <span>Stress score</span>
+            <strong id="stressScore">--</strong>
+            <small>0 to 100</small>
+        </article>
+        <article class="metric-card">
+            <span>Last updated</span>
+            <strong id="lastUpdated">--</strong>
+            <small id="latestSeq">No sequence yet</small>
+        </article>
+    </section>
+
+    <section class="analysis-grid">
+        <article class="face-panel">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">Facial model</p>
+                    <h2>Expression stress</h2>
+                </div>
+                <div class="face-actions">
+                    <button id="faceStart" type="button">Start Camera</button>
+                    <button id="faceStop" type="button" class="secondary">Stop</button>
+                </div>
+            </div>
+            <div class="face-body">
+                <div class="camera-frame">
+                    <video id="faceVideo" muted playsinline></video>
+                    <canvas id="faceCanvas" width="224" height="224" hidden></canvas>
+                    <div id="facePlaceholder" class="camera-placeholder">Camera idle</div>
+                </div>
+                <div class="face-readout">
+                    <span id="faceStatus" class="status-pill">idle</span>
+                    <div class="face-score-row">
+                        <div>
+                            <span>Face score</span>
+                            <strong id="faceScore">--</strong>
+                        </div>
+                        <div>
+                            <span>Emotion</span>
+                            <strong id="faceEmotion">--</strong>
+                        </div>
+                    </div>
+                    <div class="mini-stat-row">
+                        <span id="faceConfidence">confidence --</span>
+                        <span id="faceLatency">latency --</span>
+                    </div>
+                    <div id="faceDistribution" class="emotion-bars"></div>
+                    <small id="faceModel" class="model-note">HF model waiting</small>
+                </div>
+            </div>
+        </article>
+
+        <article class="insight-panel" id="tipPanel">
+            <p class="eyebrow">Recovery</p>
+            <h2 id="tipTitle">Ready</h2>
+            <ul id="tipList" class="tip-list">
+                <li>Keep a steady pace while readings calibrate.</li>
+            </ul>
+            <div class="component-grid">
+                <span>HR <strong id="componentHr">--</strong></span>
+                <span>GSR <strong id="componentGsr">--</strong></span>
+                <span>Face <strong id="componentFace">--</strong></span>
+            </div>
+        </article>
+    </section>
+
+    <section class="chart-panel">
+        <div class="panel-heading">
+            <h2>Live readings</h2>
+            <span id="chartStatus">Chart updates are throttled</span>
+        </div>
+        <canvas id="readingsChart" height="110"></canvas>
+    </section>
+
+    <section class="log-panel">
+        <div class="panel-heading">
+            <h2>Serial lines</h2>
+            <span>Malformed lines are ignored safely</span>
+        </div>
+        <pre id="serialLog"></pre>
+    </section>
+</section>
+
+<script type="module" src="{{ url_for('static', filename='js/dashboard_live.js') }}"></script>
+{% endblock %}

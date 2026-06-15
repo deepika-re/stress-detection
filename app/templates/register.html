@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Stress Monitor{% endblock %}
+
+{% block content %}
+<section class="auth-shell">
+    <div class="auth-visual" aria-hidden="true">
+        <div class="signal-panel wide">
+            <div class="signal-line high"></div>
+            <div class="signal-line mid"></div>
+            <div class="signal-line low"></div>
+            <div class="signal-line calm"></div>
+        </div>
+        <div class="mini-metrics">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+    <div class="auth-card">
+        <p class="eyebrow">New profile</p>
+        <h1>Create account</h1>
+        <p class="auth-copy">Set up your dashboard and optional caregiver alert contact.</p>
+    <form method="post" action="{{ url_for('auth.register_post') }}" class="stack-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <label>
+            Name
+            <input name="name" autocomplete="name" required>
+        </label>
+
+        <label>
+            Email
+            <input name="email" type="email" autocomplete="email" required>
+        </label>
+
+        <label>
+            Password
+            <input name="password" type="password" autocomplete="new-password" required>
+        </label>
+
+        <label>
+            Phone
+            <input name="phone" type="tel" autocomplete="tel">
+        </label>
+
+        <div class="form-divider">Caregiver alert details</div>
+
+        <label>
+            Caregiver email
+            <input name="caregiver_email" type="email">
+        </label>
+
+        <label>
+            Caregiver phone
+            <input name="caregiver_phone" type="tel">
+        </label>
+
+        <button type="submit">Register</button>
+    </form>
+    <p class="small-link">Already registered? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+    </div>
+</section>
+{% endblock %}

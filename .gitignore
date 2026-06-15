@@ -1,0 +1,7 @@
+.venv
+.env
+stress_data.db
+__pycache__
+instance/
+.DS_Store
+*.pyc
