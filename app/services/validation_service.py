@@ -22,7 +22,10 @@ _PAST_TOLERANCE = timedelta(days=1)
 HR_MIN = 35.0
 HR_MAX = 220.0
 GSR_MIN = 0.0
-GSR_MAX = 20.0
+# Raised from the old 0-20 µS range to match the engine's new band
+# thresholds (normal <=350, medium <=800, hard-override >800). Adjust if
+# your sensor's real ceiling differs.
+GSR_MAX = 1000.0
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
